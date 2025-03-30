@@ -17,7 +17,7 @@
 #ifndef __USBDESC_H__
 #define __USBDESC_H__
 
-#define CDC_ENABLED
+//#define CDC_ENABLED
 #define PLUGGABLE_USB_ENABLED
 
 #ifdef CDC_ENABLED
