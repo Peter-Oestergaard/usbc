@@ -69,7 +69,7 @@ const uint16_t STRING_LANGUAGE[2] = {
 #define USB_PRODUCT "Arduino Due"
 #endif
 
-//const uint8_t STRING_PRODUCT[];// = 0;//USB_PRODUCT;
+const uint8_t STRING_PRODUCT[] = USB_PRODUCT;
 
 #ifndef USB_MANUFACTURER
 #define USB_MANUFACTURER "Arduino LLC"
@@ -88,7 +88,7 @@ const DeviceDescriptor USB_DeviceDescriptor =
 	D_DEVICE(0x00,0x00,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,ISERIAL,1);
 
 const DeviceDescriptor USB_DeviceDescriptorA =
-	D_DEVICE(0x00,0x00,0x00,8,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,ISERIAL,1);
+	D_DEVICE(0xEF,0x02,0x01,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,ISERIAL,1);
 
 const QualifierDescriptor USB_DeviceQualifier =
 	D_QUALIFIER(0x00,0x00,0x00,64,1);
@@ -419,7 +419,7 @@ static bool USBD_SendDescriptor(USBSetup& setup)
 			desc_addr = (const uint8_t*)&STRING_LANGUAGE;
 		}
 		else if (setup.wValueL == IPRODUCT) {
-			return USB_SendStringDescriptor(0, setup.wLength);
+			return USB_SendStringDescriptor(STRING_PRODUCT, setup.wLength);
 		}
 		else if (setup.wValueL == IMANUFACTURER) {
 			return USB_SendStringDescriptor(STRING_MANUFACTURER, setup.wLength);

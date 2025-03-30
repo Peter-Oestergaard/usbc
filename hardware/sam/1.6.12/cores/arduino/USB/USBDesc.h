@@ -17,7 +17,7 @@
 #ifndef __USBDESC_H__
 #define __USBDESC_H__
 
-//#define CDC_ENABLED
+#define CDC_ENABLED
 #define PLUGGABLE_USB_ENABLED
 
 #ifdef CDC_ENABLED
@@ -44,8 +44,8 @@
 
 #define ISERIAL_MAX_LEN	20
 
-#define IMANUFACTURER	0
-#define IPRODUCT		0
-#define ISERIAL			0
+#define IMANUFACTURER	1
+#define IPRODUCT		2
+#define ISERIAL			3
 
 #endif /* __USBDESC_H__ */
