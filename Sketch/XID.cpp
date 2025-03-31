@@ -75,13 +75,17 @@ int XID_::getReport()
     //memcpy(data, xid_out_data, capped_len);
     return 0;//xid_out_data[1];
 }
+const uint8_t test_descriptor[] = {
+  0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, 0x08
+};
 
 int XID_::getDescriptor(USBSetup &setup)
 {
   dataArray_[2] += 1;
     //Device descriptor for duke, seems to work fine for Steel Battalion. Keep constant.
-    USBD_SendControl(TRANSFER_PGM, &xid_dev_descriptor, sizeof(xid_dev_descriptor));
-    return sizeof(xid_dev_descriptor);
+    //USBD_SendControl(TRANSFER_PGM, &xid_dev_descriptor, sizeof(xid_dev_descriptor));
+    USBD_SendControl(TRANSFER_PGM, test_descriptor, sizeof(test_descriptor));
+    return sizeof(test_descriptor);
 }
 
 bool XID_::setup(USBSetup& setup)
