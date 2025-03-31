@@ -23,7 +23,7 @@
 #define XID_PROTOCOL_NONE 0
 
 static const DeviceDescriptor xid_dev_descriptor PROGMEM =
-    D_DEVICE(0x00, 0x00, 0x00, 8, USB_VID, USB_PID, 0x0100, 0, 0, 0, 1);
+    D_DEVICE(0x00, 0x00, 0x00, 64, USB_VID, USB_PID, 0x0100, 0, 0, 0, 1);
 
 typedef struct 
 {
