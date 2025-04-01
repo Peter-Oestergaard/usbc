@@ -18,18 +18,49 @@ uint8_t XID_::getShortName(char *name) {
   return 0;
 }
 
-int XID_::getInterface(uint8_t* interfaceCount)
+const uint8_t p1[] = {
+  //0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    0x09, 0x04, 0x00, 0x00, 0x01, 0x09, 0x00, 0x00, 0x00, 0x07, 0x05, 0x81, 0x03, 0x01, 0x00, 0xff
+};
+const uint8_t p2[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+const uint8_t p3[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+const uint8_t p4[] = {
+  0x00
+};
+
+#ifndef USB_EP_SIZE
+#define USB_EP_SIZE 16
+#endif
+
+// 09021900010100a0 3209040000010900 0000070581030100 ff
+// 09 02 19 00 01 01 00 a0
+//                         32  09 04 00 00 01 09 00
+//                                                  00 00  07 05 81 03 01 00
+//                                                                           ff
+//                              00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+int XID_::getInterface(uint8_t *interfaceCount)
 {
-  dataArray_[4] += 1;
-  Serial.println("XID_::getInterface");
-	*interfaceCount += 1; // uses 1
-	XIDDescriptor xidInterface = {
-		D_INTERFACE(pluggedInterface, 2, XID_INTERFACECLASS, XID_INTERFACESUBCLASS, XID_PROTOCOL_NONE),
-		//D_XIDREPORT(descriptorSize),
-		D_ENDPOINT(USB_ENDPOINT_IN(XID_EP_IN), USB_ENDPOINT_TYPE_INTERRUPT, 32, 0x04),
-    D_ENDPOINT(USB_ENDPOINT_OUT(XID_EP_OUT), USB_ENDPOINT_TYPE_INTERRUPT, 32, 0x04)
-	};
-	return USBD_SendControl(0, &xidInterface, sizeof(xidInterface));
+    Serial.println("XID_::getInterface");
+    *interfaceCount += 2;
+
+    XIDDescriptor xid_interface = {
+        D_INTERFACE(pluggedInterface, 2, XID_INTERFACECLASS, XID_INTERFACESUBCLASS, 0),
+        D_ENDPOINT(USB_ENDPOINT_IN(XID_EP_IN), USB_ENDPOINT_TYPE_INTERRUPT, USB_EP_SIZE, 0x04),
+        D_ENDPOINT(USB_ENDPOINT_OUT(XID_EP_OUT), USB_ENDPOINT_TYPE_INTERRUPT, USB_EP_SIZE, 0x04)};
+
+    return USBD_SendControl(0, &xid_interface, sizeof(xid_interface));
+    //int total = 0;
+    //total += USBD_SendControl(0, p1, sizeof(p1));
+    //total += USBD_Send(0, 0, 1);;
+    //total += USBD_SendControl(0, p2, 8);
+    //total += USBD_SendControl(0, p3, 8);
+    //total += USBD_SendControl(0, p4, 1);
+    //return total;
 }
 /*
 int XID_::sendReport(const void *data, int len)
