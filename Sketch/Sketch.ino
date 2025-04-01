@@ -9,8 +9,8 @@ void setup() {
   Serial.begin(9600);
   //Serial.println(USBCON);
   //USBDevice.configured();
-  int succ = USBDevice.attach();
-  Serial.println(succ);
+  //int succ = USBDevice.attach();
+  //Serial.println(succ);
 }
 
 void loop() {
@@ -21,7 +21,7 @@ void loop() {
   }
   Serial.println();
 
-  usbd_xid.getReport();
+  //usbd_xid.getReport();
 
   delay(1000);
 }

@@ -33,7 +33,7 @@ typedef struct
 {
   InterfaceDescriptor xid;
   EndpointDescriptor  in;
-  EndpointDescriptor  out;
+  //EndpointDescriptor  out;
 } XIDDescriptor;
 
 class XIDSubDescriptor {
