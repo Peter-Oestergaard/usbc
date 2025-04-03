@@ -1,27 +1,42 @@
-#include "XID.h"
+// Copyright 2021, Ryan Wendland, ogx360
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-int myData[32] = {0};
-XID_ usbd_xid(myData);
+#include <Arduino.h>
 
-//usbd_steelbattalion_t sb;
+#include "main.h"
+#include "usbd_xid.h"
+//#include "usbh/usbh_xinput.h"
 
-void setup() {
-  Serial.begin(9600);
-  //Serial.println(USBCON);
-  //USBDevice.configured();
-  //int succ = USBDevice.attach();
-  //Serial.println(succ);
+
+
+uint8_t player_id;
+XID_ usbd_xid;
+usbd_controller_t usbd_c[MAX_GAMEPADS];
+
+void setup()
+{
+    Serial.begin(115200);
+
+    pinMode(ARDUINO_LED_PIN, OUTPUT);
+    pinMode(PLAYER_ID1_PIN, INPUT_PULLUP);
+    pinMode(PLAYER_ID2_PIN, INPUT_PULLUP);
+    digitalWrite(ARDUINO_LED_PIN, HIGH);
+
+    memset(usbd_c, 0x00, sizeof(usbd_controller_t) * MAX_GAMEPADS);
+        usbd_c[0].sb.in.bLength = sizeof(usbd_sbattalion_in_t);
+        usbd_c[0].sb.out.bLength = sizeof(usbd_sbattalion_out_t);
 }
 
-void loop() {
-  //usbd_xid.getReport();
-  for (int i = 0; i < 32; i++) {
-    Serial.print(myData[i]);
-    Serial.print(" ");
-  }
-  Serial.println();
+void loop()
+{
+    static uint32_t poll_timer = 0;
+    if (millis() - poll_timer > 4)
+    {
 
-  //usbd_xid.getReport();
+            usbd_xid.sendReport(&usbd_c[0].sb.in, sizeof(usbd_sbattalion_in_t));
+            usbd_xid.getReport(&usbd_c[0].sb.out, sizeof(usbd_sbattalion_out_t));
 
-  delay(1000);
+
+        poll_timer = millis();
+    }
 }
