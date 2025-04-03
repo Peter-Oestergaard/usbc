@@ -24,6 +24,7 @@ XID_ &XID()
 
 int XID_::getInterface(uint8_t *interfaceCount)
 {
+    Serial.println("XID_::getInterface");
     *interfaceCount += 1;
 
     XIDDescriptor xid_interface = {
@@ -36,9 +37,11 @@ int XID_::getInterface(uint8_t *interfaceCount)
 
 int XID_::getDescriptor(USBSetup &setup)
 {
+    Serial.println("XID_::getDescriptor");
     //Device descriptor for duke, seems to work fine for Steel Battalion. Keep constant.
     USBD_SendControl(TRANSFER_PGM, &xid_dev_descriptor, MIN(sizeof(xid_dev_descriptor), setup.wLength));
-    return sizeof(xid_dev_descriptor);
+    //return sizeof(xid_dev_descriptor);
+    return MIN(sizeof(xid_dev_descriptor), setup.wLength);
 }
 
 int XID_::sendReport(const void *data, int len)
