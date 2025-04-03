@@ -1,0 +1,28 @@
+// Copyright 2021, Ryan Wendland, ogx360
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef _MAIN_H_
+#define _MAIN_H_
+
+#include "usbd_xid.h"
+//#include "usbh/usbh_xinput.h"
+
+#ifndef MAX_GAMEPADS
+#define MAX_GAMEPADS 1
+#endif
+
+#define USB_HOST_RESET_PIN 9
+#define ARDUINO_LED_PIN 17
+#define PLAYER_ID1_PIN 19
+#define PLAYER_ID2_PIN 20
+
+#ifndef SB_DEFAULT_SENSITIVITY
+#define SB_DEFAULT_SENSITIVITY 400
+#endif
+
+typedef struct
+{
+   usbd_steelbattalion_t sb;
+} usbd_controller_t;
+
+#endif 
