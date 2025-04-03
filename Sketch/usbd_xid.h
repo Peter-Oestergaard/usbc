@@ -4,8 +4,9 @@
 #ifndef _XID_h
 #define _XID_h
 
+
 #ifndef USB_EP_SIZE
-#define USB_EP_SIZE 8
+#define USB_EP_SIZE 16
 #endif
 
 #define _USING_XID
@@ -150,6 +151,39 @@ typedef struct __attribute__((packed))
 {
     uint8_t startByte;
     uint8_t bLength;
+    uint16_t wButtons;
+    uint8_t A;
+    uint8_t B;
+    uint8_t X;
+    uint8_t Y;
+    uint8_t BLACK;
+    uint8_t WHITE;
+    uint8_t L;
+    uint8_t R;
+    int16_t leftStickX;
+    int16_t leftStickY;
+    int16_t rightStickX;
+    int16_t rightStickY;
+} usbd_duke_in_t;
+
+typedef struct __attribute__((packed))
+{
+    uint8_t startByte;
+    uint8_t bLength;
+    uint16_t lValue;
+    uint16_t hValue;
+} usbd_duke_out_t;
+
+typedef struct __attribute__((packed))
+{
+    usbd_duke_in_t in;
+    usbd_duke_out_t out;
+} usbd_duke_t;
+
+typedef struct __attribute__((packed))
+{
+    uint8_t startByte;
+    uint8_t bLength;
     uint16_t wButtons[3];
     int16_t aimingX;
     int16_t aimingY;
@@ -195,6 +229,13 @@ typedef struct __attribute__((packed))
     usbd_sbattalion_out_t out;
 } usbd_steelbattalion_t;
 
+typedef enum
+{
+    DISCONNECTED = 0,
+    DUKE,
+    STEELBATTALION
+} xid_type_t;
+
 class XID_ : public PluggableUSBModule
 {
 public:
@@ -202,6 +243,8 @@ public:
     int begin(void);
     int sendReport(const void *data, int len);
     int getReport(void *data, int len);
+    void setType(xid_type_t type);
+    xid_type_t getType(void);
 
 protected:
     int getInterface(uint8_t *interfaceCount);
@@ -209,6 +252,7 @@ protected:
     bool setup(USBSetup &setup);
 
 private:
+    xid_type_t xid_type;
     uint32_t epType[2];
     uint8_t xid_in_data[32];
     uint8_t xid_out_data[32];

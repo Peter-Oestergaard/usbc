@@ -3,9 +3,11 @@
 
 #include "usbd_xid.h"
 
-//#define ENABLE_USBD_XID_DEBUG
+#define TRANSFER_PGM 0x80
+
+#define ENABLE_USBD_XID_DEBUG
 #ifdef ENABLE_USBD_XID_DEBUG
-#define USBD_XID_DEBUG(a) Serial1.print(F(a))
+#define USBD_XID_DEBUG(a) Serial.print(F(a))
 #else
 #define USBD_XID_DEBUG(...)
 #endif
@@ -22,7 +24,6 @@ XID_ &XID()
 
 int XID_::getInterface(uint8_t *interfaceCount)
 {
-    Serial.println("XID_::getInterface");
     *interfaceCount += 1;
 
     XIDDescriptor xid_interface = {
@@ -35,10 +36,9 @@ int XID_::getInterface(uint8_t *interfaceCount)
 
 int XID_::getDescriptor(USBSetup &setup)
 {
-    Serial.println("XID_::getDescriptor");
     //Device descriptor for duke, seems to work fine for Steel Battalion. Keep constant.
-    USBD_SendControl(REQUEST_DEVICETOHOST, &xid_dev_descriptor, MIN(sizeof(xid_dev_descriptor), setup.wLength));
-    return MIN(sizeof(xid_dev_descriptor), setup.wLength);
+    USBD_SendControl(TRANSFER_PGM, &xid_dev_descriptor, MIN(sizeof(xid_dev_descriptor), setup.wLength));
+    return sizeof(xid_dev_descriptor);
 }
 
 int XID_::sendReport(const void *data, int len)
@@ -57,7 +57,7 @@ int XID_::getReport(void *data, int len)
 {
     int capped_len = min((uint32_t)len, sizeof(xid_out_data));
     uint8_t r[capped_len];// = {0};
-    for (int i; i < capped_len; i++) { r[i] = 0; }
+    for (int i = 0; i < capped_len; i++ ) { r[i] = 0; }
     if (USBD_Recv(XID_EP_OUT | TRANSFER_RELEASE, r, capped_len) == capped_len)
     {
         USBD_XID_DEBUG("USBD XID: GOT HID REPORT OUT FROM ENDPOINT\n");
@@ -80,7 +80,6 @@ int XID_::getReport(void *data, int len)
 
 bool XID_::setup(USBSetup &setup)
 {
-    Serial.println("XID_::setup");
     if (pluggedInterface != setup.wIndex)
     {
         return false;
@@ -95,21 +94,26 @@ bool XID_::setup(USBSetup &setup)
         if (request == 0x06 && wValue == 0x4200)
         {
             USBD_XID_DEBUG("USBD XID: SENDING XID DESCRIPTOR\n");
-
-                USBD_SendControl(REQUEST_DEVICETOHOST, BATTALION_DESC_XID, MIN(sizeof(BATTALION_DESC_XID), setup.wLength));
-
+            if (xid_type == DUKE)
+            {
+                USBD_SendControl(TRANSFER_PGM, DUKE_DESC_XID, MIN(sizeof(DUKE_DESC_XID), setup.wLength));
+            }
+            else if (xid_type == STEELBATTALION)
+            {
+                USBD_SendControl(TRANSFER_PGM, BATTALION_DESC_XID, MIN(sizeof(BATTALION_DESC_XID), setup.wLength));
+            }
             return true;
         }
         if (request == 0x01 && wValue == 0x0100)
         {
             USBD_XID_DEBUG("USBD XID: SENDING XID CAPABILITIES IN\n");
-            USBD_SendControl(REQUEST_DEVICETOHOST, DUKE_CAPABILITIES_IN, MIN(sizeof(DUKE_CAPABILITIES_IN), setup.wLength));
+            USBD_SendControl(TRANSFER_PGM, DUKE_CAPABILITIES_IN, MIN(sizeof(DUKE_CAPABILITIES_IN), setup.wLength));
             return true;
         }
         if (request == 0x01 && wValue == 0x0200)
         {
             USBD_XID_DEBUG("USBD XID: SENDING XID CAPABILITIES OUT\n");
-            USBD_SendControl(REQUEST_DEVICETOHOST, DUKE_CAPABILITIES_OUT, MIN(sizeof(DUKE_CAPABILITIES_OUT), setup.wLength));
+            USBD_SendControl(TRANSFER_PGM, DUKE_CAPABILITIES_OUT, MIN(sizeof(DUKE_CAPABILITIES_OUT), setup.wLength));
             return true;
         }
     }
@@ -137,10 +141,27 @@ bool XID_::setup(USBSetup &setup)
     }
 
     USBD_XID_DEBUG("USBD XID: STALL\n");
-    Serial1.println(requestType, HEX);
-    Serial1.println(request, HEX);
-    Serial1.println(wValue, HEX);
+    Serial.println(requestType, HEX);
+    Serial.println(request, HEX);
+    Serial.println(wValue, HEX);
     return false;
+}
+
+void XID_::setType(xid_type_t type)
+{
+    if (xid_type == type)
+    {
+        return;
+    }
+
+    xid_type = type;
+    delay(10);
+    return;
+}
+
+xid_type_t XID_::getType(void)
+{
+    return xid_type;
 }
 
 XID_::XID_(void) : PluggableUSBModule(2, 1, epType)
@@ -149,6 +170,7 @@ XID_::XID_(void) : PluggableUSBModule(2, 1, epType)
     epType[1] = EP_TYPE_INTERRUPT_OUT;
     memset(xid_out_data, 0x00, sizeof(xid_out_data));
     memset(xid_in_data, 0x00, sizeof(xid_in_data));
+    xid_type = STEELBATTALION;
     PluggableUSB().plug(this);
 }
 

@@ -22,7 +22,14 @@
 
 typedef struct
 {
+   xid_type_t type;
+   usbd_duke_t duke;
    usbd_steelbattalion_t sb;
 } usbd_controller_t;
+
+void master_init();
+void master_task();
+void slave_init();
+void slave_task();
 
 #endif 
